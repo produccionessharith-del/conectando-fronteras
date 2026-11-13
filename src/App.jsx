@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 import {
   ArrowRight, Check, ChevronDown, CircleHelp, Facebook, Instagram,
