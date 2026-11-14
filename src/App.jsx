@@ -1,162 +1,106 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  ArrowRight, Check, ChevronDown, CircleHelp, Facebook, Instagram,
-  MapPin, Menu, MessageCircle, RadioTower, ShieldCheck, Tv, Wifi, X, Zap
+  ArrowRight, Check, Facebook, Instagram, MapPin, Menu, MessageCircle,
+  RadioTower, ShieldCheck, Tv, Wifi, X, Zap
 } from 'lucide-react';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 import Admin from './Admin.jsx';
 
 const LOGO = 'https://cdn.imagetourls.com/uploads/tyImg/DI0JAuOh.png';
-const WHATSAPP = ''; // Agregar aquí el número oficial, con indicativo de país y sin signos.
-const FALLBACK_PLANS = [];
+const WHATSAPP = ''; // Agregar el número oficial con indicativo de país, sin signos.
+const NAV = [
+  ['Inicio', '/'], ['Internet', '/internet'], ['Televisión', '/television'],
+  ['Planes', '/planes'], ['Cobertura', '/cobertura'], ['Nosotros', '/nosotros'],
+  ['Contacto', '/contacto']
+];
 
-function App() {
-  if (window.location.pathname.replace(/\/+$/, '') === '/admin') return <Admin />;
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [plans, setPlans] = useState(FALLBACK_PLANS);
-  const [loadingPlans, setLoadingPlans] = useState(true);
-  const [form, setForm] = useState({ name: '', phone: '', neighborhood: '', service: 'Internet', message: '' });
-  const [sending, setSending] = useState(false);
-  const [notice, setNotice] = useState('');
-
-  useEffect(() => {
-    let alive = true;
-    async function loadPlans() {
-      if (!isSupabaseConfigured) { setLoadingPlans(false); return; }
-      const { data, error } = await supabase.from('plans').select('*').eq('active', true).order('sort_order');
-      if (alive && !error && data) setPlans(data);
-      if (alive) setLoadingPlans(false);
-    }
-    loadPlans();
-    return () => { alive = false; };
-  }, []);
-
-  const waLink = WHATSAPP
-    ? `https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, quiero información sobre los servicios de Conectando Fronteras.')}`
-    : '#contacto';
-
-  async function submitRequest(e) {
-    e.preventDefault();
-    setNotice('');
-    if (!form.name.trim() || !form.phone.trim()) {
-      setNotice('Por favor completa tu nombre y teléfono.');
-      return;
-    }
-    if (!isSupabaseConfigured) {
-      setNotice('El formulario estará disponible cuando conectemos Supabase. Por ahora puedes completar la información de contacto al configurar el proyecto.');
-      return;
-    }
-    setSending(true);
-    const { error } = await supabase.from('leads').insert([form]);
-    setSending(false);
-    if (error) setNotice('No pudimos enviar tu solicitud. Intenta nuevamente o contáctanos por WhatsApp.');
-    else {
-      setNotice('¡Solicitud recibida! Nuestro equipo se pondrá en contacto contigo.');
-      setForm({ name: '', phone: '', neighborhood: '', service: 'Internet', message: '' });
-    }
-  }
-
-  const closeMenu = () => setMenuOpen(false);
-
-  return (
-    <div>
-      <div className="topline"><div className="container topline-inner"><span><MapPin size={14}/> San Alberto, Cesar, Colombia</span><span className="topline-right">Conectamos hogares, acercamos personas</span></div></div>
-      <header className="header">
-        <div className="container nav-wrap">
-          <a className="brand" href="#inicio" aria-label="Conectando Fronteras, inicio"><img src={LOGO} alt="Logo Grupo Empresarial Conectando Fronteras" /></a>
-          <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menú">{menuOpen ? <X/> : <Menu/>}</button>
-          <nav className={menuOpen ? 'nav nav-open' : 'nav'}>
-            <a href="#inicio" onClick={closeMenu}>Inicio</a>
-            <a href="#servicios" onClick={closeMenu}>Servicios</a>
-            <a href="#planes" onClick={closeMenu}>Planes</a>
-            <a href="#cobertura" onClick={closeMenu}>Cobertura</a>
-            <a href="#nosotros" onClick={closeMenu}>Nosotros</a>
-            <a className="nav-cta" href="#contacto" onClick={closeMenu}>Contáctanos <ArrowRight size={16}/></a>
-          </nav>
-        </div>
-      </header>
-
-      <main>
-        <section className="hero" id="inicio">
-          <div className="hero-glow glow-one"></div><div className="hero-glow glow-two"></div>
-          <div className="container hero-grid">
-            <div className="hero-copy">
-              <div className="eyebrow"><span className="pulse"></span> CONECTIVIDAD PARA TU HOGAR Y NEGOCIO</div>
-              <h1>El mundo más cerca.<br/><span>Conectados contigo.</span></h1>
-              <p className="hero-text">Internet y entretenimiento para que disfrutes, trabajes, aprendas y compartas sin fronteras.</p>
-              <div className="hero-actions">
-                <a className="button button-primary" href="#contacto">Quiero contratar <ArrowRight size={18}/></a>
-                <a className="button button-ghost" href="#servicios">Conoce nuestros servicios</a>
-              </div>
-              <div className="hero-proof"><span><ShieldCheck size={17}/> Atención cercana</span><span><Zap size={17}/> Tecnología y conectividad</span></div>
-            </div>
-            <div className="hero-art" aria-label="Ilustración de conectividad">
-              <div className="orbit orbit-a"></div><div className="orbit orbit-b"></div>
-              <div className="signal signal-a"><Wifi size={25}/><span>INTERNET</span></div>
-              <div className="signal signal-b"><Tv size={25}/><span>TELEVISIÓN</span></div>
-              <div className="signal signal-c"><RadioTower size={25}/><span>CONECTIVIDAD</span></div>
-              <div className="central-globe"><div className="globe-lines"></div><div className="globe-core"><Wifi size={65}/></div></div>
-              <div className="art-caption"><span className="caption-dot"></span> Una conexión que nos une</div>
-            </div>
-          </div>
-          <div className="hero-bottom"><div className="container hero-bottom-inner"><span>GRUPO EMPRESARIAL</span><b>CONECTANDO FRONTERAS</b><span>SAN ALBERTO · CESAR</span></div></div>
-        </section>
-
-        <section className="service-strip" id="servicios">
-          <div className="container service-grid">
-            <article className="service-card"><div className="service-icon"><Wifi/></div><div><h3>Internet</h3><p>Conectividad para estudiar, trabajar y disfrutar.</p></div><a href="#planes" aria-label="Ver planes de internet"><ArrowRight/></a></article>
-            <article className="service-card"><div className="service-icon"><Tv/></div><div><h3>Televisión</h3><p>Entretenimiento para compartir en familia.</p></div><a href="#planes" aria-label="Consultar televisión"><ArrowRight/></a></article>
-            <article className="service-card"><div className="service-icon"><RadioTower/></div><div><h3>Soluciones para tu hogar</h3><p>Atención y acompañamiento para nuestros usuarios.</p></div><a href="#contacto" aria-label="Contactar"><ArrowRight/></a></article>
-          </div>
-        </section>
-
-        <section className="section plans-section" id="planes">
-          <div className="container">
-            <div className="section-heading"><div className="eyebrow eyebrow-light">ENCUENTRA TU CONEXIÓN</div><h2>Planes pensados para ti</h2><p>Conoce las opciones disponibles y encuentra el servicio ideal para tu hogar o negocio.</p></div>
-            {loadingPlans ? <div className="empty-plans">Cargando planes...</div> : plans.length ? (
-              <div className="plans-grid">{plans.map(plan => <article className="plan-card" key={plan.id}>
-                <div className="plan-tag">{plan.category || 'PLAN'}</div><h3>{plan.name}</h3>
-                <div className="plan-price">{plan.price_label || (plan.price ? `$${Number(plan.price).toLocaleString('es-CO')}` : 'Consulta el precio')}<small>{plan.billing_period || ''}</small></div>
-                {plan.speed && <div className="plan-speed">{plan.speed}</div>}
-                <p>{plan.description || 'Conoce los detalles de este servicio.'}</p>
-                <a className="button button-primary button-full" href={waLink}>Me interesa <ArrowRight size={17}/></a>
-              </article>)}</div>
-            ) : <div className="plans-placeholder"><div className="placeholder-icon"><Zap/></div><h3>Próximamente nuestros planes</h3><p>Estamos preparando la información de nuestros paquetes de Internet y televisión. Contáctanos para conocer la disponibilidad.</p><a className="button button-primary" href="#contacto">Consultar planes <ArrowRight size={17}/></a></div>}
-          </div>
-        </section>
-
-        <section className="coverage-section" id="cobertura">
-          <div className="container coverage-grid">
-            <div className="coverage-visual"><div className="coverage-ring ring-1"></div><div className="coverage-ring ring-2"></div><div className="coverage-pin"><MapPin size={38}/></div><div className="coverage-label">SAN ALBERTO<br/><small>CESAR · COLOMBIA</small></div></div>
-            <div className="coverage-copy"><div className="eyebrow eyebrow-light">ESTAMOS CERCA DE TI</div><h2>Conectando nuestra región con el mundo</h2><p>¿Quieres saber si tenemos cobertura en tu barrio o sector? Escríbenos y nuestro equipo te ayudará a consultar la disponibilidad del servicio.</p><a className="button button-primary" href="#contacto">Consultar cobertura <ArrowRight size={18}/></a></div>
-          </div>
-        </section>
-
-        <section className="section about-section" id="nosotros"><div className="container about-grid">
-          <div><div className="eyebrow">NUESTRA EMPRESA</div><h2>Conectamos personas.<br/><span>Acercamos oportunidades.</span></h2></div>
-          <div className="about-copy"><p>Grupo Empresarial Conectando Fronteras trabaja para acercar soluciones de conectividad y entretenimiento a la comunidad de San Alberto, Cesar.</p><p>Queremos ofrecer una experiencia sencilla: información clara, atención cercana y acompañamiento a nuestros usuarios.</p><div className="about-points"><span><Check/> Atención a nuestros usuarios</span><span><Check/> Soluciones de conectividad</span><span><Check/> Compromiso con la región</span></div></div>
-        </div></section>
-
-        <section className="contact-section" id="contacto"><div className="container contact-grid">
-          <div className="contact-copy"><div className="eyebrow eyebrow-light">HABLEMOS</div><h2>Tu próxima conexión comienza aquí.</h2><p>Déjanos tus datos y cuéntanos qué servicio necesitas. Nuestro equipo se pondrá en contacto contigo.</p><div className="contact-note"><MessageCircle/><span><b>¿Prefieres atención directa?</b><br/>Escríbenos por nuestros canales oficiales.</span></div>{WHATSAPP && <a className="button button-whatsapp" href={waLink} target="_blank" rel="noreferrer"><MessageCircle size={18}/> Hablar por WhatsApp</a>}</div>
-          <form className="contact-form" onSubmit={submitRequest}>
-            <h3>Solicita información</h3><p>Completa el formulario y nos comunicaremos contigo.</p>
-            <label>Nombre completo<input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Tu nombre" required /></label>
-            <div className="form-row"><label>Teléfono<input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="Tu número de contacto" required /></label><label>Barrio o sector<input value={form.neighborhood} onChange={e=>setForm({...form,neighborhood:e.target.value})} placeholder="¿Dónde vives?" /></label></div>
-            <label>Servicio de interés<select value={form.service} onChange={e=>setForm({...form,service:e.target.value})}><option>Internet</option><option>Televisión</option><option>Internet + Televisión</option><option>Soporte técnico</option><option>Otro</option></select></label>
-            <label>Mensaje<textarea rows="3" value={form.message} onChange={e=>setForm({...form,message:e.target.value})} placeholder="Cuéntanos cómo podemos ayudarte..." /></label>
-            {notice && <div className="form-notice" role="status">{notice}</div>}
-            <button className="button button-primary button-full" disabled={sending}>{sending ? 'Enviando...' : 'Enviar solicitud'} <ArrowRight size={17}/></button>
-            <small className="privacy-note"><ShieldCheck size={13}/> Usaremos tus datos únicamente para atender tu solicitud.</small>
-          </form>
-        </div></section>
-      </main>
-
-      <footer className="footer"><div className="container footer-main"><div className="footer-brand"><img src={LOGO} alt="Conectando Fronteras"/><p>Internet y televisión. Conectividad que nos une.</p></div><div><h4>Explora</h4><a href="#servicios">Servicios</a><a href="#planes">Planes</a><a href="#cobertura">Cobertura</a></div><div><h4>Empresa</h4><a href="#nosotros">Nosotros</a><a href="#contacto">Contáctanos</a></div><div><h4>Ubicación</h4><p><MapPin size={15}/> San Alberto, Cesar, Colombia</p><p className="footer-muted">Pronto agregaremos nuestros canales oficiales de atención.</p></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} Grupo Empresarial Conectando Fronteras S.A.S.</span><span>Todos los derechos reservados.</span></div></footer>
-      <a className="floating-help" href="#contacto" aria-label="Solicitar información"><MessageCircle/></a>
-    </div>
-  );
+function currentPath() {
+  const path = window.location.pathname.replace(/\/+$/, '');
+  return path || '/';
 }
 
-export default App;
+function Header({ path }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  return <>
+    <div className="topline"><div className="container topline-inner"><span><MapPin size={14}/> San Alberto, Cesar, Colombia</span><span className="topline-right">Conectamos hogares, acercamos personas</span></div></div>
+    <header className="header"><div className="container nav-wrap">
+      <a className="brand" href="/" aria-label="Conectando Fronteras, inicio"><img src={LOGO} alt="Logo Grupo Empresarial Conectando Fronteras" /></a>
+      <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menú">{menuOpen ? <X/> : <Menu/>}</button>
+      <nav className={menuOpen ? 'nav nav-open' : 'nav'}>
+        {NAV.map(([label, href]) => <a key={href} className={path === href ? 'active' : ''} href={href} onClick={() => setMenuOpen(false)}>{label}</a>)}
+        <a className="nav-cta" href="/contacto" onClick={() => setMenuOpen(false)}>Contáctanos <ArrowRight size={16}/></a>
+      </nav>
+    </div></header>
+  </>;
+}
+
+function PageHero({ kicker, title, text }) {
+  return <section className="page-hero"><div className="container"><div className="eyebrow eyebrow-light">{kicker}</div><h1>{title}</h1><p>{text}</p></div></section>;
+}
+
+function HomePage() {
+  return <>
+    <section className="hero"><div className="hero-glow glow-one"></div><div className="hero-glow glow-two"></div><div className="container hero-grid">
+      <div className="hero-copy"><div className="eyebrow"><span className="pulse"></span> CONECTIVIDAD PARA TU HOGAR Y NEGOCIO</div><h1>El mundo más cerca.<br/><span>Conectados contigo.</span></h1><p className="hero-text">Internet y entretenimiento para que disfrutes, trabajes, aprendas y compartas sin fronteras.</p><div className="hero-actions"><a className="button button-primary" href="/planes">Conoce nuestros planes <ArrowRight size={18}/></a><a className="button button-ghost" href="/servicios">Conoce nuestros servicios</a></div><div className="hero-proof"><span><ShieldCheck size={17}/> Atención cercana</span><span><Zap size={17}/> Tecnología y conectividad</span></div></div>
+      <div className="hero-art" aria-label="Ilustración de conectividad"><div className="orbit orbit-a"></div><div className="orbit orbit-b"></div><div className="signal signal-a"><Wifi size={25}/><span>INTERNET</span></div><div className="signal signal-b"><Tv size={25}/><span>TELEVISIÓN</span></div><div className="signal signal-c"><RadioTower size={25}/><span>CONECTIVIDAD</span></div><div className="central-globe"><div className="globe-lines"></div><div className="globe-core"><Wifi size={65}/></div></div><div className="art-caption"><span className="caption-dot"></span> Una conexión que nos une</div></div>
+    </div><div className="hero-bottom"><div className="container hero-bottom-inner"><span>GRUPO EMPRESARIAL</span><b>CONECTANDO FRONTERAS</b><span>SAN ALBERTO · CESAR</span></div></div></section>
+    <section className="service-strip"><div className="container service-grid">
+      <article className="service-card"><div className="service-icon"><Wifi/></div><div><h3>Internet</h3><p>Conectividad para estudiar, trabajar y disfrutar.</p></div><a href="/internet" aria-label="Ver Internet"><ArrowRight/></a></article>
+      <article className="service-card"><div className="service-icon"><Tv/></div><div><h3>Televisión</h3><p>Entretenimiento para compartir en familia.</p></div><a href="/television" aria-label="Ver televisión"><ArrowRight/></a></article>
+      <article className="service-card"><div className="service-icon"><RadioTower/></div><div><h3>Atención al usuario</h3><p>Estamos para acompañarte y ayudarte.</p></div><a href="/contacto" aria-label="Contactar"><ArrowRight/></a></article>
+    </div></section>
+    <section className="section plans-section"><div className="container"><div className="section-heading"><div className="eyebrow eyebrow-light">ENCUENTRA TU CONEXIÓN</div><h2>Planes pensados para ti</h2><p>Conoce nuestras opciones y encuentra el servicio ideal para tu hogar o negocio.</p><a className="button button-primary" href="/planes">Ver planes <ArrowRight size={17}/></a></div></div></section>
+    <section className="coverage-section"><div className="container coverage-grid"><CoverageVisual/><div className="coverage-copy"><div className="eyebrow eyebrow-light">ESTAMOS CERCA DE TI</div><h2>Conectando nuestra región con el mundo</h2><p>Consulta si tenemos cobertura en tu barrio o sector.</p><a className="button button-primary" href="/cobertura">Consultar cobertura <ArrowRight size={18}/></a></div></div></section>
+  </>;
+}
+
+function CoverageVisual() { return <div className="coverage-visual"><div className="coverage-ring ring-1"></div><div className="coverage-ring ring-2"></div><div className="coverage-pin"><MapPin size={38}/></div><div className="coverage-label">SAN ALBERTO<br/><small>CESAR · COLOMBIA</small></div></div>; }
+
+function ServicePage({ type }) {
+  const internet = type === 'internet';
+  return <><PageHero kicker={internet ? 'INTERNET PARA TU DÍA A DÍA' : 'ENTRETENIMIENTO PARA COMPARTIR'} title={internet ? 'Internet que te conecta con lo que importa.' : 'Televisión para disfrutar en familia.'} text={internet ? 'Conectividad para estudiar, trabajar, emprender y disfrutar tus contenidos favoritos.' : 'Una opción de entretenimiento para acompañar los momentos de tu hogar.'}/>
+    <section className="section"><div className="container detail-grid"><div className="detail-icon">{internet ? <Wifi size={52}/> : <Tv size={52}/>}</div><div><div className="eyebrow">NUESTROS SERVICIOS</div><h2>{internet ? 'Conexión para tus actividades' : 'Disfruta tus contenidos'}</h2><p>{internet ? 'Queremos acercarte a una experiencia de conexión práctica para las necesidades de tu hogar y negocio. Consulta disponibilidad y alternativas según tu sector.' : 'Conoce las alternativas de televisión disponibles en tu zona. Nuestro equipo puede orientarte sobre cobertura, características y condiciones del servicio.'}</p><div className="about-points"><span><Check/> Atención cercana</span><span><Check/> Información clara</span><span><Check/> Consulta de disponibilidad</span></div><a className="button button-primary" href="/contacto">Solicitar información <ArrowRight size={17}/></a></div></div></section>
+  </>;
+}
+
+function PlansPage() {
+  const [plans, setPlans] = useState([]); const [loading, setLoading] = useState(true);
+  useEffect(() => { let alive = true; async function load() { if (!isSupabaseConfigured) { setLoading(false); return; } const { data, error } = await supabase.from('plans').select('*').eq('active', true).order('sort_order'); if (alive && !error && data) setPlans(data); if (alive) setLoading(false); } load(); return () => { alive = false; }; }, []);
+  const wa = WHATSAPP ? `https://wa.me/${WHATSAPP}` : '/contacto';
+  return <><PageHero kicker="ENCUENTRA TU CONEXIÓN" title="Planes para tu hogar y negocio." text="Consulta las opciones disponibles y encuentra el servicio que mejor se adapte a tus necesidades."/><section className="section plans-section"><div className="container">{loading ? <div className="empty-plans">Cargando planes...</div> : plans.length ? <div className="plans-grid">{plans.map(plan => <article className="plan-card" key={plan.id}><div className="plan-tag">{plan.category || 'PLAN'}</div><h3>{plan.name}</h3><div className="plan-price">{plan.price_label || (plan.price ? `$${Number(plan.price).toLocaleString('es-CO')}` : 'Consulta el precio')}<small>{plan.billing_period || ''}</small></div>{plan.speed && <div className="plan-speed">{plan.speed}</div>}<p>{plan.description || 'Conoce los detalles de este servicio.'}</p><a className="button button-primary button-full" href={wa}>Me interesa <ArrowRight size={17}/></a></article>)}</div> : <div className="plans-placeholder"><div className="placeholder-icon"><Zap/></div><h3>Próximamente nuestros planes</h3><p>Estamos preparando la información de nuestros paquetes de Internet y televisión. Contáctanos para conocer la disponibilidad.</p><a className="button button-primary" href="/contacto">Consultar planes <ArrowRight size={17}/></a></div>}</div></section></>;
+}
+
+function CoveragePage() { return <><PageHero kicker="ESTAMOS CERCA DE TI" title="Consulta nuestra cobertura." text="Queremos llevar conectividad a más hogares y negocios de nuestra región. Pregúntanos por tu barrio o sector."/><section className="coverage-section"><div className="container coverage-grid"><CoverageVisual/><div className="coverage-copy"><div className="eyebrow eyebrow-light">SAN ALBERTO · CESAR</div><h2>¿Llegamos hasta tu hogar?</h2><p>Cuéntanos dónde necesitas el servicio. Nuestro equipo te ayudará a consultar la disponibilidad de cobertura.</p><a className="button button-primary" href="/contacto">Consultar mi sector <ArrowRight size={18}/></a></div></div></section></>; }
+
+function AboutPage() { return <><PageHero kicker="NUESTRA EMPRESA" title="Conectamos personas. Acercamos oportunidades." text="Somos Grupo Empresarial Conectando Fronteras S.A.S., una empresa orientada a acercar soluciones de conectividad y entretenimiento a nuestra comunidad."/><section className="section about-section"><div className="container about-grid"><div><div className="eyebrow">NUESTRO COMPROMISO</div><h2>Conectividad con sentido de región.</h2></div><div className="about-copy"><p>Trabajamos para acercar soluciones de conectividad y entretenimiento a la comunidad de San Alberto, Cesar.</p><p>Queremos ofrecer una experiencia sencilla: información clara, atención cercana y acompañamiento a nuestros usuarios.</p><div className="about-points"><span><Check/> Atención a nuestros usuarios</span><span><Check/> Soluciones de conectividad</span><span><Check/> Compromiso con la región</span></div></div></div></section></>; }
+
+function ContactPage() {
+  const [form, setForm] = useState({ name: '', phone: '', neighborhood: '', service: 'Internet', message: '' });
+  const [sending, setSending] = useState(false); const [notice, setNotice] = useState('');
+  async function submitRequest(e) { e.preventDefault(); setNotice(''); if (!form.name.trim() || !form.phone.trim()) { setNotice('Por favor completa tu nombre y teléfono.'); return; } if (!isSupabaseConfigured) { setNotice('El formulario aún no está conectado. Por favor contáctanos por nuestros canales oficiales.'); return; } setSending(true); const { error } = await supabase.from('leads').insert([form]); setSending(false); if (error) setNotice('No pudimos enviar tu solicitud. Intenta nuevamente o contáctanos.'); else { setNotice('¡Solicitud recibida! Nuestro equipo se pondrá en contacto contigo.'); setForm({ name: '', phone: '', neighborhood: '', service: 'Internet', message: '' }); } }
+  return <><PageHero kicker="HABLEMOS" title="Tu próxima conexión comienza aquí." text="Déjanos tus datos y cuéntanos qué servicio necesitas. Nuestro equipo se pondrá en contacto contigo."/><section className="contact-section"><div className="container contact-grid"><div className="contact-copy"><div className="eyebrow eyebrow-light">ATENCIÓN AL USUARIO</div><h2>Estamos para ayudarte.</h2><p>Escríbenos para consultar planes, cobertura o resolver tus inquietudes.</p><div className="contact-note"><MessageCircle/><span><b>Atención cercana</b><br/>Cuéntanos cómo podemos ayudarte.</span></div>{WHATSAPP && <a className="button button-whatsapp" href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer"><MessageCircle size={18}/> Hablar por WhatsApp</a>}</div>
+    <form className="contact-form" onSubmit={submitRequest}><h3>Solicita información</h3><p>Completa el formulario y nos comunicaremos contigo.</p><label>Nombre completo<input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Tu nombre" required/></label><div className="form-row"><label>Teléfono<input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="Tu número de contacto" required/></label><label>Barrio o sector<input value={form.neighborhood} onChange={e=>setForm({...form,neighborhood:e.target.value})} placeholder="¿Dónde vives?"/></label></div><label>Servicio de interés<select value={form.service} onChange={e=>setForm({...form,service:e.target.value})}><option>Internet</option><option>Televisión</option><option>Internet + Televisión</option><option>Soporte técnico</option><option>Otro</option></select></label><label>Mensaje<textarea rows="3" value={form.message} onChange={e=>setForm({...form,message:e.target.value})} placeholder="Cuéntanos cómo podemos ayudarte..."/></label>{notice && <div className="form-notice" role="status">{notice}</div>}<button className="button button-primary button-full" disabled={sending}>{sending ? 'Enviando...' : 'Enviar solicitud'} <ArrowRight size={17}/></button><small className="privacy-note"><ShieldCheck size={13}/> Usaremos tus datos únicamente para atender tu solicitud.</small></form>
+  </div></section></>;
+}
+
+function Footer() { return <footer className="footer"><div className="container footer-main"><div className="footer-brand"><img src={LOGO} alt="Conectando Fronteras"/><p>Internet y televisión. Conectividad que nos une.</p></div><div><h4>Explora</h4><a href="/internet">Internet</a><a href="/television">Televisión</a><a href="/planes">Planes</a><a href="/cobertura">Cobertura</a></div><div><h4>Empresa</h4><a href="/nosotros">Nosotros</a><a href="/contacto">Contáctanos</a><a href="/admin">Panel administrativo</a></div><div><h4>Ubicación</h4><p><MapPin size={15}/> San Alberto, Cesar, Colombia</p><p className="footer-muted">Pronto agregaremos nuestros canales oficiales de atención.</p></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} Grupo Empresarial Conectando Fronteras S.A.S.</span><span>Todos los derechos reservados.</span></div></footer>; }
+
+function NotFound() { return <section className="section"><div className="container not-found"><div className="eyebrow">PÁGINA NO ENCONTRADA</div><h1>Esta dirección no está disponible.</h1><p>Verifica la dirección o regresa al inicio.</p><a className="button button-primary" href="/">Volver al inicio <ArrowRight size={17}/></a></div></section>; }
+
+export default function App() {
+  const path = currentPath();
+  if (path === '/admin' || path.startsWith('/admin/')) return <Admin/>;
+  let page;
+  switch (path) {
+    case '/': page = <HomePage/>; break;
+    case '/internet': page = <ServicePage type="internet"/>; break;
+    case '/television': page = <ServicePage type="television"/>; break;
+    case '/planes': page = <PlansPage/>; break;
+    case '/cobertura': page = <CoveragePage/>; break;
+    case '/nosotros': page = <AboutPage/>; break;
+    case '/contacto': page = <ContactPage/>; break;
+    case '/servicios': page = <><PageHero kicker="NUESTROS SERVICIOS" title="Soluciones para estar conectados." text="Conoce nuestras opciones de Internet y televisión."/><section className="service-strip"><div className="container service-grid"><article className="service-card"><div className="service-icon"><Wifi/></div><div><h3>Internet</h3><p>Conectividad para tu hogar y negocio.</p></div><a href="/internet"><ArrowRight/></a></article><article className="service-card"><div className="service-icon"><Tv/></div><div><h3>Televisión</h3><p>Entretenimiento para compartir.</p></div><a href="/television"><ArrowRight/></a></article></div></section></>; break;
+    default: page = <NotFound/>;
+  }
+  return <div><Header path={path}/><main>{page}</main><Footer/><a className="floating-help" href="/contacto" aria-label="Solicitar información"><MessageCircle/></a></div>;
+}
