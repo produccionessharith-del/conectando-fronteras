@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 
-const LOGO = 'https://cdn.imagetourls.com/uploads/tyImg/XDYk5HAl.png';
+const LOGO = 'https://cdn.imagetourls.com/uploads/tyImg/DI0JAuOh.png';
 const WHATSAPP = ''; // Agregar aquí el número oficial, con indicativo de país y sin signos.
 const FALLBACK_PLANS = [];
 
