@@ -43,7 +43,6 @@ function Header({ path }) {
   const NAV = usePublicPages();
   const settings = useSiteSettings();
   return <>
-    <AdBanner settings={settings}/>
     <div className="topline"><div className="container topline-inner"><span><MapPin size={14}/> {settings.address || 'San Alberto, Cesar, Colombia'}</span><span className="topline-right">Conectamos hogares, acercamos personas</span></div></div>
     <header className="header"><div className="container nav-wrap">
       <a className="brand" href="/" aria-label="Conectando Fronteras, inicio"><img src={settings.logo_url || LOGO} alt="Logo Grupo Empresarial Conectando Fronteras" /></a>
@@ -123,6 +122,7 @@ function NotFound() { return <section className="section"><div className="contai
 
 export default function App() {
   const path = currentPath();
+  const siteSettings = useSiteSettings();
   if (path === '/admin' || path.startsWith('/admin/')) return <Admin/>;
   let page;
   switch (path) {
@@ -136,5 +136,5 @@ export default function App() {
     case '/servicios': page = <><PageHero slug="/servicios" kicker="NUESTROS SERVICIOS" title="Soluciones para estar conectados." text="Conoce nuestras opciones de Internet y televisión."/><section className="service-strip"><div className="container service-grid"><article className="service-card"><div className="service-icon"><Wifi/></div><div><h3>Internet</h3><p>Conectividad para tu hogar y negocio.</p></div><a href="/internet"><ArrowRight/></a></article><article className="service-card"><div className="service-icon"><Tv/></div><div><h3>Televisión</h3><p>Entretenimiento para compartir.</p></div><a href="/television"><ArrowRight/></a></article></div></section></>; break;
     default: page = <DynamicPage slug={path}/>;
   }
-  return <div><Header path={path}/><main>{page}</main><Footer/><WhatsAppFloat/></div>;
+  return <div><Header path={path}/><AdBanner settings={siteSettings}/><main>{page}</main><Footer/><WhatsAppFloat/></div>;
 }
