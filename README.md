@@ -60,3 +60,14 @@ La clave `anon`/publicable está diseñada para uso en navegador junto con RLS. 
 - El panel permite crear, editar, publicar/despublicar y eliminar planes, además de revisar solicitudes y cambiar su estado.
 - El panel no crea cuentas ni guarda contraseñas; la autenticación la gestiona Supabase.
 - No compartas claves privadas ni uses la service_role en el navegador.
+
+## Administrar todo el contenido desde /admin
+Para activar el administrador de contenido, ejecuta también `supabase/cms.sql` en Supabase SQL Editor, después de `schema.sql` y `admin-panel.sql`.
+
+Desde el panel podrás:
+- Editar títulos, textos principales, contenido de sección y slugs de las páginas.
+- Publicar/ocultar páginas y controlar cuáles aparecen en el menú y su orden.
+- Actualizar logo, nombre de empresa, frase, teléfono, WhatsApp, correo, dirección y redes sociales.
+- Administrar planes y solicitudes de clientes.
+
+Después de ejecutar el SQL, vuelve a cargar `/admin`. Las páginas nuevas creadas desde el panel usan una plantilla de contenido general; las páginas especiales (Inicio, Internet, Televisión, Planes, Cobertura, Nosotros y Contacto) conservan sus componentes de diseño y permiten editar sus campos principales.
