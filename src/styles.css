@@ -34,3 +34,18 @@
 .not-found h1{font:800 clamp(30px,4vw,44px) Manrope,sans-serif;margin:14px 0}
 .not-found p{color:var(--muted);margin:0 0 22px}
 @media(max-width:680px){.page-hero{padding:60px 0 65px}.page-hero h1{letter-spacing:-1px}.detail-grid{grid-template-columns:1fr;gap:28px}.detail-icon{width:145px;height:145px;border-radius:25px}}
+
+/* WhatsApp flotante */
+.floating-whatsapp{position:fixed;right:24px;bottom:24px;z-index:50;background:#25D366;color:#fff;border-radius:999px;padding:14px 19px;display:flex;align-items:center;gap:10px;font-weight:700;box-shadow:0 8px 28px #0003;transition:transform .2s}
+.floating-whatsapp:hover{transform:translateY(-3px);background:#1fbd5b}
+.floating-whatsapp svg{width:22px;height:22px}
+@media(max-width:600px){.floating-whatsapp{right:15px;bottom:15px;padding:13px 16px}.floating-whatsapp span{font-size:13px}}
+
+/* Espacio publicitario superior */
+.ad-banner-wrap{background:#f5f8fc;padding:14px 0 10px}
+.ad-banner{width:min(1050px,calc(100% - 32px));aspect-ratio:1050/250;margin:0 auto;overflow:hidden;border-radius:8px;background:#edf2f7;border:1px dashed #b8c8d8}
+.ad-banner>a{display:block;width:100%;height:100%}
+.ad-banner img{display:block;width:100%;height:100%;object-fit:contain}
+.ad-banner-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:#718398;font-size:clamp(11px,2vw,15px)}
+.ad-banner-empty strong{letter-spacing:.12em;color:#8295a8;font-size:clamp(12px,2vw,18px)}
+@media(max-width:600px){.ad-banner-wrap{padding:8px 0}.ad-banner{width:calc(100% - 20px);border-radius:5px}}

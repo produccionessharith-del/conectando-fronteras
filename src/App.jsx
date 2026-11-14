@@ -7,7 +7,6 @@ import { isSupabaseConfigured, supabase } from './lib/supabase';
 import Admin from './Admin.jsx';
 
 const LOGO = 'https://cdn.imagetourls.com/uploads/tyImg/DI0JAuOh.png';
-const WHATSAPP = ''; // Agregar el número oficial con indicativo de país, sin signos.
 const NAV_FALLBACK = [['Inicio','/'],['Internet','/internet'],['Televisión','/television'],['Planes','/planes'],['Cobertura','/cobertura'],['Nosotros','/nosotros'],['Contacto','/contacto']];
 
 function usePublicPages() {
@@ -17,7 +16,7 @@ function usePublicPages() {
 }
 
 function useSiteSettings() {
-  const [settings,setSettings]=useState({logo_url:LOGO,tagline:'Internet y televisión. Conectividad que nos une.',address:'San Alberto, Cesar, Colombia',whatsapp:'',phone:'',email:'',facebook_url:'',instagram_url:''});
+  const [settings,setSettings]=useState({logo_url:LOGO,tagline:'Internet y televisión. Conectividad que nos une.',address:'Calle 4 #4-47, San Alberto, Cesar, Colombia',banner_url:'',whatsapp:'573172437825',phone:'',email:'',facebook_url:'',instagram_url:''});
   useEffect(()=>{let alive=true;if(!isSupabaseConfigured)return;supabase.from('site_settings').select('key,value').then(({data})=>{if(alive&&data?.length){const next={...settings};data.forEach(x=>next[x.key]=x.value??'');setSettings(next);}});return()=>{alive=false;};},[]);
   return settings;
 }
@@ -33,11 +32,18 @@ function currentPath() {
   return path || '/';
 }
 
+function AdBanner({settings}) {
+  return <div className="ad-banner-wrap"><div className="ad-banner">
+    {settings.banner_url ? <a href={settings.banner_link || '#'} target={settings.banner_link ? '_blank' : undefined} rel={settings.banner_link ? 'noreferrer' : undefined} aria-label="Publicidad"><img src={settings.banner_url} alt="Banner publicitario"/></a> : <div className="ad-banner-empty"><strong>ESPACIO PUBLICITARIO</strong><span>Banner recomendado: 1050 × 250 px</span></div>}
+  </div></div>;
+}
+
 function Header({ path }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const NAV = usePublicPages();
   const settings = useSiteSettings();
   return <>
+    <AdBanner settings={settings}/>
     <div className="topline"><div className="container topline-inner"><span><MapPin size={14}/> {settings.address || 'San Alberto, Cesar, Colombia'}</span><span className="topline-right">Conectamos hogares, acercamos personas</span></div></div>
     <header className="header"><div className="container nav-wrap">
       <a className="brand" href="/" aria-label="Conectando Fronteras, inicio"><img src={settings.logo_url || LOGO} alt="Logo Grupo Empresarial Conectando Fronteras" /></a>
@@ -84,9 +90,11 @@ function ServicePage({ type }) {
 
 function PlansPage() {
   const cms = usePageContent('/planes');
+  const settings = useSiteSettings();
+  const whatsapp = (settings.whatsapp || '').replace(/\\D/g, '');
   const [plans, setPlans] = useState([]); const [loading, setLoading] = useState(true);
   useEffect(() => { let alive = true; async function load() { if (!isSupabaseConfigured) { setLoading(false); return; } const { data, error } = await supabase.from('plans').select('*').eq('active', true).order('sort_order'); if (alive && !error && data) setPlans(data); if (alive) setLoading(false); } load(); return () => { alive = false; }; }, []);
-  const wa = WHATSAPP ? `https://wa.me/${WHATSAPP}` : '/contacto';
+  const wa = whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent('Hola, quiero información sobre los planes de Conectando Fronteras.')}` : '/contacto';
   return <><PageHero slug="/planes" kicker="ENCUENTRA TU CONEXIÓN" title="Planes para tu hogar y negocio." text="Consulta las opciones disponibles y encuentra el servicio que mejor se adapte a tus necesidades."/><section className="section plans-section"><div className="container">{loading ? <div className="empty-plans">Cargando planes...</div> : plans.length ? <div className="plans-grid">{plans.map(plan => <article className="plan-card" key={plan.id}><div className="plan-tag">{plan.category || 'PLAN'}</div><h3>{plan.name}</h3><div className="plan-price">{plan.price_label || (plan.price ? `$${Number(plan.price).toLocaleString('es-CO')}` : 'Consulta el precio')}<small>{plan.billing_period || ''}</small></div>{plan.speed && <div className="plan-speed">{plan.speed}</div>}<p>{plan.description || 'Conoce los detalles de este servicio.'}</p><a className="button button-primary button-full" href={wa}>Me interesa <ArrowRight size={17}/></a></article>)}</div> : <div className="plans-placeholder"><div className="placeholder-icon"><Zap/></div><h3>{cms?.section_title || 'Próximamente nuestros planes'}</h3><p>{cms?.section_text || 'Estamos preparando la información de nuestros paquetes de Internet y televisión. Contáctanos para conocer la disponibilidad.'}</p><a className="button button-primary" href="/contacto">Consultar planes <ArrowRight size={17}/></a></div>}</div></section></>;
 }
 
@@ -96,13 +104,16 @@ function AboutPage() { const cms=usePageContent('/nosotros'); return <><PageHero
 
 function ContactPage() {
   const cms=usePageContent('/contacto');
+  const settings=useSiteSettings(); const whatsapp=(settings.whatsapp||'').replace(/\\D/g,'');
   const [form, setForm] = useState({ name: '', phone: '', neighborhood: '', service: 'Internet', message: '' });
   const [sending, setSending] = useState(false); const [notice, setNotice] = useState('');
   async function submitRequest(e) { e.preventDefault(); setNotice(''); if (!form.name.trim() || !form.phone.trim()) { setNotice('Por favor completa tu nombre y teléfono.'); return; } if (!isSupabaseConfigured) { setNotice('El formulario aún no está conectado. Por favor contáctanos por nuestros canales oficiales.'); return; } setSending(true); const { error } = await supabase.from('leads').insert([form]); setSending(false); if (error) setNotice('No pudimos enviar tu solicitud. Intenta nuevamente o contáctanos.'); else { setNotice('¡Solicitud recibida! Nuestro equipo se pondrá en contacto contigo.'); setForm({ name: '', phone: '', neighborhood: '', service: 'Internet', message: '' }); } }
-  return <><PageHero slug="/contacto" kicker="HABLEMOS" title="Tu próxima conexión comienza aquí." text="Déjanos tus datos y cuéntanos qué servicio necesitas. Nuestro equipo se pondrá en contacto contigo."/><section className="contact-section"><div className="container contact-grid"><div className="contact-copy"><div className="eyebrow eyebrow-light">ATENCIÓN AL USUARIO</div><h2>{cms?.section_title || 'Estamos para ayudarte.'}</h2><p>{cms?.section_text || 'Escríbenos para consultar planes, cobertura o resolver tus inquietudes.'}</p><div className="contact-note"><MessageCircle/><span><b>Atención cercana</b><br/>Cuéntanos cómo podemos ayudarte.</span></div>{WHATSAPP && <a className="button button-whatsapp" href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer"><MessageCircle size={18}/> Hablar por WhatsApp</a>}</div>
+  return <><PageHero slug="/contacto" kicker="HABLEMOS" title="Tu próxima conexión comienza aquí." text="Déjanos tus datos y cuéntanos qué servicio necesitas. Nuestro equipo se pondrá en contacto contigo."/><section className="contact-section"><div className="container contact-grid"><div className="contact-copy"><div className="eyebrow eyebrow-light">ATENCIÓN AL USUARIO</div><h2>{cms?.section_title || 'Estamos para ayudarte.'}</h2><p>{cms?.section_text || 'Escríbenos para consultar planes, cobertura o resolver tus inquietudes.'}</p><div className="contact-note"><MessageCircle/><span><b>Atención cercana</b><br/>Cuéntanos cómo podemos ayudarte.</span></div>{whatsapp && <a className="button button-whatsapp" href={`https://wa.me/${whatsapp}?text=${encodeURIComponent('Hola, quiero información sobre los servicios de Internet y televisión de Conectando Fronteras.')}`} target="_blank" rel="noreferrer"><MessageCircle size={18}/> Hablar por WhatsApp</a>}</div>
     <form className="contact-form" onSubmit={submitRequest}><h3>Solicita información</h3><p>Completa el formulario y nos comunicaremos contigo.</p><label>Nombre completo<input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Tu nombre" required/></label><div className="form-row"><label>Teléfono<input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="Tu número de contacto" required/></label><label>Barrio o sector<input value={form.neighborhood} onChange={e=>setForm({...form,neighborhood:e.target.value})} placeholder="¿Dónde vives?"/></label></div><label>Servicio de interés<select value={form.service} onChange={e=>setForm({...form,service:e.target.value})}><option>Internet</option><option>Televisión</option><option>Internet + Televisión</option><option>Soporte técnico</option><option>Otro</option></select></label><label>Mensaje<textarea rows="3" value={form.message} onChange={e=>setForm({...form,message:e.target.value})} placeholder="Cuéntanos cómo podemos ayudarte..."/></label>{notice && <div className="form-notice" role="status">{notice}</div>}<button className="button button-primary button-full" disabled={sending}>{sending ? 'Enviando...' : 'Enviar solicitud'} <ArrowRight size={17}/></button><small className="privacy-note"><ShieldCheck size={13}/> Usaremos tus datos únicamente para atender tu solicitud.</small></form>
   </div></section></>;
 }
+
+function WhatsAppFloat() { const settings=useSiteSettings(); const number=(settings.whatsapp||'').replace(/\\D/g,''); if(!number)return null; return <a className="floating-whatsapp" href={`https://wa.me/${number}?text=${encodeURIComponent('Hola, quiero información sobre los servicios de Internet y televisión de Conectando Fronteras.')}`} target="_blank" rel="noreferrer" aria-label="Chatear por WhatsApp"><MessageCircle/><span>WhatsApp</span></a>; }
 
 function Footer() { const settings=useSiteSettings(); return <footer className="footer"><div className="container footer-main"><div className="footer-brand"><img src={settings.logo_url || LOGO} alt="Conectando Fronteras"/><p>{settings.tagline || 'Internet y televisión. Conectividad que nos une.'}</p></div><div><h4>Explora</h4><a href="/internet">Internet</a><a href="/television">Televisión</a><a href="/planes">Planes</a><a href="/cobertura">Cobertura</a></div><div><h4>Empresa</h4><a href="/nosotros">Nosotros</a><a href="/contacto">Contáctanos</a><a href="/admin">Panel administrativo</a></div><div><h4>Ubicación</h4><p><MapPin size={15}/> {settings.address || 'San Alberto, Cesar, Colombia'}</p>{settings.phone && <p>{settings.phone}</p>}{settings.email && <p>{settings.email}</p>}</div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} Grupo Empresarial Conectando Fronteras S.A.S.</span><span>Todos los derechos reservados.</span></div></footer>; }
 
@@ -125,5 +136,5 @@ export default function App() {
     case '/servicios': page = <><PageHero slug="/servicios" kicker="NUESTROS SERVICIOS" title="Soluciones para estar conectados." text="Conoce nuestras opciones de Internet y televisión."/><section className="service-strip"><div className="container service-grid"><article className="service-card"><div className="service-icon"><Wifi/></div><div><h3>Internet</h3><p>Conectividad para tu hogar y negocio.</p></div><a href="/internet"><ArrowRight/></a></article><article className="service-card"><div className="service-icon"><Tv/></div><div><h3>Televisión</h3><p>Entretenimiento para compartir.</p></div><a href="/television"><ArrowRight/></a></article></div></section></>; break;
     default: page = <DynamicPage slug={path}/>;
   }
-  return <div><Header path={path}/><main>{page}</main><Footer/><a className="floating-help" href="/contacto" aria-label="Solicitar información"><MessageCircle/></a></div>;
+  return <div><Header path={path}/><main>{page}</main><Footer/><WhatsAppFloat/></div>;
 }
