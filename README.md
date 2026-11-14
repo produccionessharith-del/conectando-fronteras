@@ -49,3 +49,14 @@ El formulario guarda solicitudes en `public.leads`. Los planes activos se leen d
 
 ## Seguridad
 La clave `anon`/publicable está diseñada para uso en navegador junto con RLS. Nunca incluyas `service_role` ni secretos privados en variables `VITE_*` ni en el código del frontend.
+
+
+## Panel administrativo
+- Ruta privada: `https://TU-DOMINIO.vercel.app/admin`.
+- Inicia sesión con Supabase Auth (correo y contraseña).
+- En Supabase > Authentication > Users crea el usuario administrador.
+- Copia su UUID y ejecuta `supabase/admin-panel.sql` en SQL Editor.
+- Autoriza al usuario ejecutando: `insert into public.admin_users (user_id) values ('UUID-DEL-USUARIO');`
+- El panel permite crear, editar, publicar/despublicar y eliminar planes, además de revisar solicitudes y cambiar su estado.
+- El panel no crea cuentas ni guarda contraseñas; la autenticación la gestiona Supabase.
+- No compartas claves privadas ni uses la service_role en el navegador.

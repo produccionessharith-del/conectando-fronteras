@@ -5,12 +5,14 @@ import {
   MapPin, Menu, MessageCircle, RadioTower, ShieldCheck, Tv, Wifi, X, Zap
 } from 'lucide-react';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
+import Admin from './Admin.jsx';
 
 const LOGO = 'https://cdn.imagetourls.com/uploads/tyImg/DI0JAuOh.png';
 const WHATSAPP = ''; // Agregar aquí el número oficial, con indicativo de país y sin signos.
 const FALLBACK_PLANS = [];
 
 function App() {
+  if (window.location.pathname.replace(/\/+$/, '') === '/admin') return <Admin />;
   const [menuOpen, setMenuOpen] = useState(false);
   const [plans, setPlans] = useState(FALLBACK_PLANS);
   const [loadingPlans, setLoadingPlans] = useState(true);
