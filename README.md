@@ -71,3 +71,10 @@ Desde el panel podrás:
 - Administrar planes y solicitudes de clientes.
 
 Después de ejecutar el SQL, vuelve a cargar `/admin`. Las páginas nuevas creadas desde el panel usan una plantilla de contenido general; las páginas especiales (Inicio, Internet, Televisión, Planes, Cobertura, Nosotros y Contacto) conservan sus componentes de diseño y permiten editar sus campos principales.
+
+
+## Módulo de banners publicitarios
+
+Para habilitar la pestaña **Banners** del panel `/admin`, abre Supabase → SQL Editor y ejecuta `supabase/ad-banners.sql` después de las migraciones `admin-panel.sql` y `cms.sql`. Esta migración crea la tabla `ad_banners`, el bucket público `public-banners` y las políticas para que solo los administradores autorizados puedan subir, modificar y eliminar imágenes.
+
+Desde el panel podrás cargar imágenes (máximo 8 MB), asignar un enlace, definir fechas de inicio y finalización, activar o pausar campañas y ordenar su aparición. Los banners vigentes se muestran en el espacio publicitario debajo del encabezado del sitio.

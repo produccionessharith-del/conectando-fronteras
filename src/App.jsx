@@ -6,7 +6,7 @@ import {
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 import Admin from './Admin.jsx';
 
-const LOGO = 'https://cdn.imagetourls.com/uploads/tyImg/DI0JAuOh.png';
+const LOGO = 'https://cdn.phototourl.com/member/2026-11-26-264324ed-f326-40f1-a9c6-d9e2984dd936.png';
 const NAV_FALLBACK = [['Inicio','/'],['Internet','/internet'],['Televisión','/television'],['Planes','/planes'],['Cobertura','/cobertura'],['Nosotros','/nosotros'],['Contacto','/contacto']];
 
 function usePublicPages() {
@@ -32,10 +32,16 @@ function currentPath() {
   return path || '/';
 }
 
+function usePublicBanners() {
+  const [banners,setBanners]=useState([]);
+  useEffect(()=>{let alive=true;if(!isSupabaseConfigured)return;supabase.from('ad_banners').select('id,title,image_url,link_url,start_date,end_date,active,sort_order').eq('active',true).order('sort_order').then(({data})=>{if(alive&&data){const today=new Date();today.setHours(0,0,0,0);setBanners(data.filter(b=>{const start=!b.start_date||new Date(`${b.start_date}T00:00:00`)<=today;const end=!b.end_date||new Date(`${b.end_date}T23:59:59`)>today;return start&&end;}));}});return()=>{alive=false;};},[]);
+  return banners;
+}
+
 function AdBanner({settings}) {
-  return <div className="ad-banner-wrap"><div className="ad-banner">
-    {settings.banner_url ? <a href={settings.banner_link || '#'} target={settings.banner_link ? '_blank' : undefined} rel={settings.banner_link ? 'noreferrer' : undefined} aria-label="Publicidad"><img src={settings.banner_url} alt="Banner publicitario"/></a> : <div className="ad-banner-empty"><strong>ESPACIO PUBLICITARIO</strong><span>Banner recomendado: 1050 × 250 px</span></div>}
-  </div></div>;
+  const banners=usePublicBanners();
+  if(banners.length) return <div className="ad-banner-wrap"><div className="ad-banner-gallery">{banners.map(b=><div className="ad-banner" key={b.id}>{b.link_url?<a href={b.link_url} target="_blank" rel="noreferrer" aria-label={b.title||'Publicidad'}><img src={b.image_url} alt={b.title||'Banner publicitario'}/></a>:<img src={b.image_url} alt={b.title||'Banner publicitario'}/>}</div>)}</div></div>;
+  return <div className="ad-banner-wrap"><div className="ad-banner">{settings.banner_url ? <a href={settings.banner_link || '#'} target={settings.banner_link ? '_blank' : undefined} rel={settings.banner_link ? 'noreferrer' : undefined} aria-label="Publicidad"><img src={settings.banner_url} alt="Banner publicitario"/></a> : <div className="ad-banner-empty"><strong>ESPACIO PUBLICITARIO</strong><span>Banner recomendado: 1050 × 250 px</span></div>}</div></div>;
 }
 
 function Header({ path }) {

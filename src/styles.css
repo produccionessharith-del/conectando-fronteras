@@ -49,3 +49,15 @@
 .ad-banner-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:#718398;font-size:clamp(11px,2vw,15px)}
 .ad-banner-empty strong{letter-spacing:.12em;color:#8295a8;font-size:clamp(12px,2vw,18px)}
 @media(max-width:600px){.ad-banner-wrap{padding:8px 0}.ad-banner{width:calc(100% - 20px);border-radius:5px}}
+
+/* Gestión de banners publicitarios */
+.ad-banner-gallery{width:min(1050px,calc(100% - 32px));margin:0 auto;display:grid;gap:12px}
+.ad-banner-gallery .ad-banner{width:100%;aspect-ratio:1050/250}
+.ad-banner-gallery .ad-banner a{display:block;width:100%;height:100%}
+.admin-banner-preview{display:block;width:min(100%,560px);max-height:150px;object-fit:contain;object-position:left center;border:1px solid #dce5ed;border-radius:8px;background:#fff;padding:5px;margin:8px 0}
+.admin-banner-list{display:grid;gap:12px}
+.admin-banner-item{display:flex;align-items:center;gap:16px;padding:12px;border:1px solid #e3eaf1;border-radius:10px;min-width:0}
+.admin-banner-item>img{width:190px;aspect-ratio:1050/250;object-fit:contain;background:#f4f7fa;border-radius:6px}
+.admin-banner-info{display:flex;flex:1;min-width:0;flex-direction:column;gap:6px}
+.admin-banner-info small{color:#718398}
+@media(max-width:600px){.admin-banner-item{align-items:flex-start;flex-wrap:wrap}.admin-banner-item>img{width:100%}.admin-banner-item .admin-actions{margin-left:auto}}
